@@ -4,7 +4,13 @@ import { useState, useEffect, useRef } from "react"
 import "../app/styles/vernetti-tree.css"
 
 // Individual Person Card Component
-const PersonCard = ({ person, onClick, showExpand = false, onExpand, expanded = false }) => (
+const PersonCard: React.FC<PersonCardProps> = ({
+  person,
+  onClick,
+  showExpand = false,
+  onExpand,
+  expanded = false,
+}) => (
   <div className="person-card-compact">
     <div className="person-avatar-small" onClick={() => onClick && onClick(person)}>
       {person.imageSrc ? (
@@ -21,7 +27,7 @@ const PersonCard = ({ person, onClick, showExpand = false, onExpand, expanded = 
     </div>
     <p className="person-name-compact">{person.name.split(" ")[0]}</p>
     {showExpand && (
-      <div className="expand-btn-small" onClick={onExpand} style={{marginTop: "1rem"}}>
+      <div className="expand-btn-small" onClick={onExpand} style={{ marginTop: "1rem" }}>
         {expanded ? "−" : "+"}
       </div>
     )}
@@ -29,7 +35,7 @@ const PersonCard = ({ person, onClick, showExpand = false, onExpand, expanded = 
 )
 
 // Couple Component (for married pairs)
-const CoupleCard = ({
+const CoupleCard: React.FC<CoupleCardProps> = ({
   partner1,
   partner2,
   marriageDate,
@@ -43,12 +49,18 @@ const CoupleCard = ({
     <div className="couple-cards-small">
       <PersonCard
         person={partner1}
-        onClick={() => onClick && onClick({ partner1, partner2, marriageDate, marriagePlace, type: "couple" })}
+        onClick={() =>
+          onClick &&
+          onClick({ partner1, partner2, marriageDate, marriagePlace, type: "couple" })
+        }
       />
       <div className="marriage-connector">♥</div>
       <PersonCard
         person={partner2}
-        onClick={() => onClick && onClick({ partner1, partner2, marriageDate, marriagePlace, type: "couple" })}
+        onClick={() =>
+          onClick &&
+          onClick({ partner1, partner2, marriageDate, marriagePlace, type: "couple" })
+        }
       />
     </div>
     {showExpand && (
@@ -164,7 +176,6 @@ const FamilyUnit = ({ parents, children, forceVisible = false, onPersonClick, on
   )
 }
 
-// Focus Modal
 type Person = {
   name: string
   birth?: string
@@ -176,6 +187,31 @@ type Person = {
   type?: string
   partner1?: Person
   partner2?: Person
+}
+
+type PersonCardProps = {
+  person: Person
+  onClick?: (person: Person) => void
+  showExpand?: boolean
+  onExpand?: () => void
+  expanded?: boolean
+}
+
+type CoupleCardProps = {
+  partner1: Person
+  partner2: Person
+  marriageDate?: string
+  marriagePlace?: string
+  onClick?: (couple: {
+    partner1: Person
+    partner2: Person
+    marriageDate?: string
+    marriagePlace?: string
+    type: "couple"
+  }) => void
+  showExpand?: boolean
+  onExpand?: () => void
+  expanded?: boolean
 }
 
 type FocusModalProps = {
