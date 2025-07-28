@@ -1,2 +1,2 @@
 # Family-Trees
-Whalin and Vernetti Family tree websites
+ Vernetti Family tree website built in Next.js styled by Vercel V0
