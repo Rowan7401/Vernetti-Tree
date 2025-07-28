@@ -258,6 +258,7 @@ ul {
 
 .quad-parents {
   display: flex;
+  flex-direction: row;
   gap: 1rem; /* Adjust spacing as needed */
   justify-content: center;
   align-items: flex-start;

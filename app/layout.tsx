@@ -1,9 +1,8 @@
-// app/layout.tsx
-import './globals.css'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
-import type { Metadata } from 'next'
-import Head from 'next/head'
+import '/vernetti-tree.css'; 
+import '/globals.css';
+import getConfig from 'next/config';
+
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Vernetti Family Tree',
@@ -12,19 +11,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/Vernetti-Icon.png',
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body suppressHydrationWarning>
-        <div id="root">{children}</div>
-        </body>
-
+    <html lang="en">
+      <body>{children}</body>
     </html>
-  )
+  );
 }

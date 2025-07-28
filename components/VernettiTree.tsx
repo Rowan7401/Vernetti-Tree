@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import "../app/styles/vernetti-tree.css"
+// import "../app/styles/vernetti-tree.css"
+
 
 // Types
 type Person = {
@@ -58,8 +59,9 @@ type FamilyUnitProps = {
   parentActiveChild?: string | null
 }
 
+
 type FocusModalProps = {
-  focusedPerson: PersonOrCouple | null
+  focusedPerson: Person | (Person & { type: "couple"; partner1: Person; partner2: Person; marriageDate?: string; marriagePlace?: string }) | null
   onClose: () => void
 }
 
@@ -252,23 +254,62 @@ const FocusModal = ({ focusedPerson, onClose }: FocusModalProps) => {
 
   if (!focusedPerson) return null
 
-  // Check if it's a Couple type
-  if ("type" in focusedPerson && focusedPerson.type === "couple") {
-    // Couple modal (already safe to access partner1, partner2)
+  if (focusedPerson.type === "couple") {
     return (
       <div className="focus-overlay" onClick={onClose} ref={modalRef}>
         <div className="focus-modal couple-modal" onClick={(e) => e.stopPropagation()}>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
-          {/* ... couple UI */}
+          <div className="couple-focus-cards">
+            <div className="focus-person">
+              <div className="focus-avatar">
+                {focusedPerson.partner1 && focusedPerson.partner1.imageSrc ? (
+                  <img
+                    src={focusedPerson.partner1.imageSrc || "/placeholder.svg"}
+                    alt={focusedPerson.partner1.name}
+                    className="focus-image"
+                  />
+                ) : focusedPerson.partner1 ? (
+                  <div className="focus-placeholder">{focusedPerson.partner1.name.split(" ").map((n) => n[0])}</div>
+                ) : null}
+              </div>
+              <h2 className="focus-name">{focusedPerson.partner1 ? focusedPerson.partner1.name : ""}</h2>
+              {focusedPerson.partner1 && focusedPerson.partner1.birth && <p className="focus-detail">Born: {focusedPerson.partner1.birth}</p>}
+              {focusedPerson.partner1 && focusedPerson.partner1.death && focusedPerson.partner1.death !== "Living" && (
+                <p className="focus-detail">Died: {focusedPerson.partner1.death}</p>
+              )}
+            </div>
+            <div className="marriage-focus-info">
+              <div className="heart-large">♥</div>
+              <div className="marriage-focus-details">
+                {focusedPerson.marriageDate && <p>Married: {focusedPerson.marriageDate}</p>}
+                {focusedPerson.marriagePlace && <p>{focusedPerson.marriagePlace}</p>}
+              </div>
+            </div>
+            <div className="focus-person">
+              <div className="focus-avatar">
+                {focusedPerson.partner2 && focusedPerson.partner2.imageSrc ? (
+                  <img
+                    src={focusedPerson.partner2.imageSrc || "/placeholder.svg"}
+                    alt={focusedPerson.partner2.name}
+                    className="focus-image"
+                  />
+                ) : focusedPerson.partner2 ? (
+                  <div className="focus-placeholder">{focusedPerson.partner2.name.split(" ").map((n) => n[0])}</div>
+                ) : null}
+              </div>
+              <h2 className="focus-name">{focusedPerson.partner2 ? focusedPerson.partner2.name : ""}</h2>
+              {focusedPerson.partner2 && focusedPerson.partner2.birth && <p className="focus-detail">Born: {focusedPerson.partner2.birth}</p>}
+              {focusedPerson.partner2 && focusedPerson.partner2.death && focusedPerson.partner2.death !== "Living" && (
+                <p className="focus-detail">Died: {focusedPerson.partner2.death}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     )
   }
-
-  // If it's a Person — now TS knows focusedPerson is Person here
-  const person = focusedPerson as Person
 
   return (
     <div className="focus-overlay" onClick={onClose} ref={modalRef}>
@@ -278,24 +319,22 @@ const FocusModal = ({ focusedPerson, onClose }: FocusModalProps) => {
         </button>
         <div className="focus-content">
           <div className="focus-avatar">
-            {person.imageSrc ? (
+            {focusedPerson.imageSrc ? (
               <img
-                src={person.imageSrc || "/placeholder.svg"}
-                alt={person.name}
+                src={focusedPerson.imageSrc || "/placeholder.svg"}
+                alt={focusedPerson.name}
                 className="focus-image"
               />
             ) : (
-              <div className="focus-placeholder">
-                {person.name.split(" ").map((n) => n[0])}
-              </div>
+              <div className="focus-placeholder">{focusedPerson.name.split(" ").map((n) => n[0])}</div>
             )}
           </div>
-          <h2 className="focus-name">{person.name}</h2>
-          {person.birth && <p className="focus-detail">Born: {person.birth}</p>}
-          {person.death && person.death !== "Living" && (
-            <p className="focus-detail">Died: {person.death}</p>
+          <h2 className="focus-name">{focusedPerson.name}</h2>
+          {focusedPerson.birth && <p className="focus-detail">Born: {focusedPerson.birth}</p>}
+          {focusedPerson.death && focusedPerson.death !== "Living" && (
+            <p className="focus-detail">Died: {focusedPerson.death}</p>
           )}
-          {person.married && <p className="focus-detail">Marital Status: {person.married}</p>}
+          {focusedPerson.married && <p className="focus-detail">Marital Status: {focusedPerson.married}</p>}
         </div>
       </div>
     </div>
@@ -307,39 +346,7 @@ const FocusModal = ({ focusedPerson, onClose }: FocusModalProps) => {
 const VernettiTree = () => {
   const [focusedPerson, setFocusedPerson] = useState<PersonOrCouple | null>(null)
 
-  // Vernetti family data structure
-  const familyData = {
-    parents: [
-      {
-        name: "Donald Marshall",
-        birth: "24 Jan 1912, Niles, Michigan",
-        death: "Living",
-        imageSrc: "/assets/Vernetti/Grandpa Marshall.jpg",
-      },
-      {
-        name: "Mary Kuzmitz Marshall",
-        birth: "02 Nov 1915, South Bend, Indiana",
-        death: "Living",
-        imageSrc: "/assets/Vernetti/Grandma Marshall.jpg",
-        marriageDate: "09 Sep 1944",
-      },
-    ],
-    children: [
-      {
-        parents: [
-          {
-            name: "Joan K. Marshall",
-            birth: "16 Sep 1945, South Bend, Indiana",
-            death: "Living",
-            imageSrc: "/assets/Vernetti/Nana.jpg",
-          },
-        ],
-        children: [],
-      },
-    ],
-  }
-
-  // Second root family - Vernetti side
+  // root family - Vernetti side
   const vernettiData = {
     parents: [
       {
@@ -505,11 +512,23 @@ const VernettiTree = () => {
                     parents: [
                       {
                         name: "Benjamin James Vernetti",
-                        birth: "08 Oct 2019, Sacramento, California",
+                        birth: "08 Oct 2019 San Diego, California",
                         death: "Living",
                         married: "Single",
-                        imageSrc: "/assets/Vernetti/Benji.png",
+                        imageSrc: "/assets/Vernetti/Ben.png",
                       },
+                    ],
+                    children: [],
+                  },
+                      {
+                    parents: [
+                      {
+                        name: "Robert Blake Vernetti",
+                        birth: "14 Dec 2021 San Diego, California",
+                        death: "Living",
+                        married: "Single",
+                        imageSrc: "/assets/Vernetti/Blake.png",
+                      }
                     ],
                     children: [],
                   },
@@ -525,15 +544,15 @@ const VernettiTree = () => {
   return (
     <>
       <div className="vernetti-tree-container">
+        <div className="tree-header">
+          <div className="header-tree-image">
+            <img src="/assets/Vernetti/italia.png" alt="Family Tree" className="tree-photo" />
+          </div>
+          <h1 className="tree-title">Vernetti Family Tree</h1>
+          <h2 className="other-tree-link">Whalin Family Tree</h2>
+          <p className="tree-subtitle">Click on family members to explore their details</p>
+        </div>
         <ul className="family-tree">
-          <FamilyUnit
-            parents={familyData.parents}
-            children={familyData.children}
-            forceVisible={true}
-            onPersonClick={setFocusedPerson}
-            onChildExpand={() => { }}
-            parentActiveChild={null}
-          />
           <FamilyUnit
             parents={vernettiData.parents}
             children={vernettiData.children}
