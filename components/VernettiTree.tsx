@@ -27,6 +27,7 @@ type Couple = {
 }
 
 type PersonOrCouple = Person | Couple
+type FocusedPerson = Person | Couple | null
 
 type PersonCardProps = {
   person: Person
@@ -41,7 +42,7 @@ type CoupleCardProps = {
   partner2: Person
   marriageDate?: string
   marriagePlace?: string
-  onClick?: (couple: PersonOrCouple) => void
+  onClick?: (couple: Couple) => void
   showExpand?: boolean
   onExpand?: () => void
   expanded?: boolean
@@ -51,17 +52,16 @@ type FamilyUnitProps = {
   parents: Person[]
   children?: Array<{
     parents: Person[]
-    children?: any[] // you can be more specific if you want
+    children?: any[]
   }>
   forceVisible?: boolean
-  onPersonClick?: (personOrCouple: PersonOrCouple) => void
+  onPersonClick: (person: FocusedPerson) => void  // match arg to handler param type
   onChildExpand?: (childName: string | null) => void
   parentActiveChild?: string | null
 }
 
-
 type FocusModalProps = {
-  focusedPerson: Person | (Person & { type: "couple"; partner1: Person; partner2: Person; marriageDate?: string; marriagePlace?: string }) | null
+  focusedPerson: FocusedPerson
   onClose: () => void
 }
 
@@ -247,10 +247,12 @@ const FocusModal = ({ focusedPerson, onClose }: FocusModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (focusedPerson && modalRef.current) {
-      modalRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+    if (focusedPerson) {
+      setTimeout(() => {
+        modalRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
     }
-  }, [focusedPerson])
+  }, [focusedPerson]);
 
   if (!focusedPerson) return null
 
@@ -310,41 +312,57 @@ const FocusModal = ({ focusedPerson, onClose }: FocusModalProps) => {
       </div>
     )
   }
+  else {
+    const person = focusedPerson as Person
 
-  return (
-    <div className="focus-overlay" onClick={onClose} ref={modalRef}>
-      <div className="focus-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>
-          ×
-        </button>
-        <div className="focus-content">
-          <div className="focus-avatar">
-            {focusedPerson.imageSrc ? (
-              <img
-                src={focusedPerson.imageSrc || "/placeholder.svg"}
-                alt={focusedPerson.name}
-                className="focus-image"
-              />
-            ) : (
-              <div className="focus-placeholder">{focusedPerson.name.split(" ").map((n) => n[0])}</div>
+    return (
+      
+      <div className="focus-overlay" onClick={onClose} ref={modalRef}>
+        <div className="focus-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
+          <div className="focus-content">
+            <div className="focus-avatar">
+              {person.imageSrc ? (
+                <img
+                  src={person.imageSrc || "/placeholder.svg"}
+                  alt={person.name}
+                  className="focus-image"
+                />
+              ) : (
+                <div className="focus-placeholder">{person.name.split(" ").map((n) => n[0])}</div>
+              )}
+            </div>
+            <h2 className="focus-name">{person.name}</h2>
+            {person.birth && <p className="focus-detail">Born: {person.birth}</p>}
+            {person.death && person.death !== "Living" && (
+              <p className="focus-detail">Died: {person.death}</p>
             )}
+            {person.married && <p className="focus-detail">Marital Status: {person.married}</p>}
           </div>
-          <h2 className="focus-name">{focusedPerson.name}</h2>
-          {focusedPerson.birth && <p className="focus-detail">Born: {focusedPerson.birth}</p>}
-          {focusedPerson.death && focusedPerson.death !== "Living" && (
-            <p className="focus-detail">Died: {focusedPerson.death}</p>
-          )}
-          {focusedPerson.married && <p className="focus-detail">Marital Status: {focusedPerson.married}</p>}
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
+
+
 
 
 // Main Vernetti Family Tree Component
 const VernettiTree = () => {
-  const [focusedPerson, setFocusedPerson] = useState<PersonOrCouple | null>(null)
+  const [focusedPerson, setFocusedPerson] = useState<FocusModalProps['focusedPerson']>(null)
+
+  const handlePersonClick = (person: FocusedPerson) => {
+    if (person && 'type' in person && person.type === "couple") {
+      // person is Couple
+      setFocusedPerson(person)
+    } else {
+      // person is a single Person or null
+      setFocusedPerson(person)
+    }
+  }
 
   // root family - Vernetti side
   const vernettiData = {
@@ -520,7 +538,7 @@ const VernettiTree = () => {
                     ],
                     children: [],
                   },
-                      {
+                  {
                     parents: [
                       {
                         name: "Robert Blake Vernetti",
@@ -557,7 +575,7 @@ const VernettiTree = () => {
             parents={vernettiData.parents}
             children={vernettiData.children}
             forceVisible={true}
-            onPersonClick={setFocusedPerson}
+            onPersonClick={handlePersonClick}
             onChildExpand={() => { }}
             parentActiveChild={null}
           />
