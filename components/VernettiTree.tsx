@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { vernettiData } from "../vernettiData"
+import RootConnector from "./RootConnector"
 // import "../app/styles/vernetti-tree.css"
 
 
@@ -222,6 +223,11 @@ const FamilyUnit = ({
       </div>
 
       {expanded && children && children.length > 0 && (
+          <>
+           <RootConnector 
+            childCount={children.length} 
+            nameTag={`${parents[0].name} & ${parents[1]?.name ?? ""}`} 
+            />
         <ul className="children-container">
           {children.map((child) => {
             const childKey = child.parents[0].name
@@ -239,6 +245,7 @@ const FamilyUnit = ({
             )
           })}
         </ul>
+        </>
       )}
     </li>
   )
@@ -364,25 +371,24 @@ const VernettiTree = () => {
       setFocusedPerson(person)
     }
   }
-  
 
   return (
-    <>
-      <div className="vernetti-tree-container">
-        <div className="tree-header">
-          <div className="header-tree-image">
-            <img src="/assets/Vernetti/italia.png" alt="Family Tree" className="tree-photo" />
-          </div>
-          <h1 className="tree-title">Vernetti Family Tree</h1>
-          <h2 className="other-tree-link">
-            <a href="https://whalin-family-tree.netlify.app/" target="_blank" rel="noopener noreferrer" className="link">
-              Whalin Family Tree
-              </a>
-          </h2>
-
-          <p className="tree-subtitle">Click on family members to explore their details</p>
+    <div className="vernetti-tree-container">
+      <div className="tree-header">
+        <div className="header-tree-image">
+          <img src="/assets/Vernetti/italia.png" alt="Family Tree" className="tree-photo" />
         </div>
-        <ul className="family-tree">
+        <h1 className="tree-title">Vernetti Family Tree</h1>
+        <h2 className="other-tree-link">
+          <a href="https://whalin-family-tree.netlify.app/" target="_blank" rel="noopener noreferrer" className="link">
+            Whalin Family Tree
+          </a>
+        </h2>
+        <p className="tree-subtitle">Click on family members to explore their details</p>
+      </div>
+
+      <div className="tree-wrapper">
+        <ul className="tree-root">
           <FamilyUnit
             parents={vernettiData.parents}
             children={vernettiData.children}
@@ -393,8 +399,9 @@ const VernettiTree = () => {
           />
         </ul>
       </div>
+
       <FocusModal focusedPerson={focusedPerson} onClose={() => setFocusedPerson(null)} />
-    </>
+    </div>
   )
 }
 
