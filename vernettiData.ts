@@ -32,7 +32,7 @@ export const vernettiData = {
           {
             name: "Donald Leroy Marshall",
             birth: "24 Jan 1912, Niles, Michigan",
-            death: "19 Jan 1998, South Bend, Indiana",
+            death: "19 Jan 1998, San Diego, California",
             imageSrc: "/assets/Vernetti/Grandpa Marshall.jpg",
           },
           {
